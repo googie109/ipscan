@@ -13,12 +13,12 @@ import net.azib.ipscan.gui.InputDialog;
 import net.azib.ipscan.gui.ResultTable;
 import net.azib.ipscan.gui.StatusBar;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Device;
+import org.eclipse.swt.widgets.*;
 
 import javax.inject.Inject;
+import java.util.List;
 
 /**
  * GotoActions
@@ -158,21 +158,49 @@ public class GotoMenuActions {
 			}
 		}
 
+		private void clearHighlights(final ResultTable table) {
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					for (int i = 0; i < table.getItemCount(); i++) {
+						TableItem item = resultTable.getItem(i);
+						item.setBackground(null);
+					}
+				}
+			});
+		}
+
 		private void findText(String text, Shell activeShell) {
 			ScanningResultList results = resultTable.getScanningResults();
+
+			// clear out previous result highlights
+			clearHighlights(resultTable);
 			
 			int startIndex = resultTable.getSelectionIndex() + 1;
-			
-			int foundIndex = results.findText(text, startIndex);					
-			
-			if (foundIndex >= 0) {
+			final List<Integer> foundIndexes = results.findText(text, 0);
+
+			if (foundIndexes.size() > 0) {
 				// if found, then select and finish
-				resultTable.setSelection(foundIndex);
+				resultTable.setSelection(startIndex);
 				resultTable.setFocus();
+
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						Device device = Display.getCurrent();
+						Color orangeColor = new Color(device, 255, 112, 56);
+						for (Integer i : foundIndexes) {
+							TableItem item = resultTable.getItem(i);
+							if (!item.getText().equals("")) {
+								item.setBackground(orangeColor);
+							}
+						}
+					}
+				});
 				return;
 			}
-			
-			if (startIndex > 0) {
+
+			if (startIndex > 0 && foundIndexes.size() > 0) {
 				// if started not from the beginning, offer to restart				
 				MessageBox messageBox = new MessageBox(activeShell, SWT.YES | SWT.NO | SWT.ICON_QUESTION);
 				messageBox.setText(Labels.getLabel("title.find"));
@@ -181,6 +209,9 @@ public class GotoMenuActions {
 					resultTable.deselectAll();
 					findText(text, activeShell);
 				}
+				// reset back to the first table row if we didn't find anything
+				resultTable.setSelection(0);
+				resultTable.setFocus();
 			}
 			else {
 				// searching is finished, nothing was found				

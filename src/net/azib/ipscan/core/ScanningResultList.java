@@ -5,6 +5,7 @@
  */
 package net.azib.ipscan.core;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import net.azib.ipscan.core.ScanningResult.ResultType;
 import net.azib.ipscan.core.state.ScanningState;
 import net.azib.ipscan.core.state.StateMachine;
@@ -18,6 +19,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.net.InetAddress;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The holder of scanning results.
@@ -234,19 +237,38 @@ public class ScanningResultList implements Iterable<ScanningResult> {
 	 * @param startIndex the element to start from
 	 * @return the index of found element, or -1
 	 */
-	public int findText(String text, int startIndex) {
-		text = text.toLowerCase();
-		for (int i = startIndex; i < resultList.size(); i++) {
+//	public int findText(String text, int startIndex) {
+//		text = text.toLowerCase();
+//		for (int i = startIndex; i < resultList.size(); i++) {
+//			ScanningResult scanningResult = getResult(i);
+//
+//			for (Object value : scanningResult.getValues()) {
+//				if (value != null && value.toString().toLowerCase().contains(text)) {
+//					return i;
+//				}
+//			}
+//		}
+//		// not found
+//		return -1;
+//	}
+
+	public List<Integer> findText(String pattern, int startIndex) {
+		List<Integer> indexes = new ArrayList<>();
+		Pattern regex = Pattern.compile(pattern);
+
+		for (int i = startIndex; i < resultList.size(); i++)
+		{
 			ScanningResult scanningResult = getResult(i);
-			
-			for (Object value : scanningResult.getValues()) {				
-				if (value != null && value.toString().toLowerCase().contains(text)) {						
-					return i;
+			scanningResult.getValues();
+
+			for (Object value : scanningResult.getValues()) {
+				String str = value == null ? "" : value.toString();
+				if (regex.matcher(str).matches()) {
+					indexes.add(i);
 				}
 			}
 		}
-		// not found
-		return -1;
+		return indexes;
 	}
 	
 	private void updateStatistics(ScanningResult result) {
