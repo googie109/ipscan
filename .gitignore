@@ -10,3 +10,27 @@
 /test-coverage
 ipscan.iml
 .idea
+
+# Eclipse
+.classpath
+.project
+.settings/
+ 
+# Intellij
+.idea/
+*.iml
+*.iws
+*.eml
+*.properties
+*.xml
+ 
+# Mac
+.DS_Store
+ 
+# Maven
+log/
+target/
+
+
+# vim stuff
+.swp
