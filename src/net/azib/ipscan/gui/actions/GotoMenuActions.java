@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.widgets.*;
+import sun.rmi.runtime.Log;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -180,19 +181,23 @@ public class GotoMenuActions {
 			final List<Integer> foundIndexes = results.findText(text, 0);
 
 			if (foundIndexes.size() > 0) {
-				// if found, then select and finish
+				// ensure start index is correct
+				startIndex = getStartIndex(startIndex, foundIndexes);
+
 				resultTable.setSelection(startIndex);
 				resultTable.setFocus();
+				resultTable.showSelection();
 
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						Device device = Display.getCurrent();
-						Color orangeColor = new Color(device, 255, 112, 56);
+						// green color
+						Color highlightColor = new Color(device, 50, 255, 50);
 						for (Integer i : foundIndexes) {
 							TableItem item = resultTable.getItem(i);
 							if (!item.getText().equals("")) {
-								item.setBackground(orangeColor);
+								item.setBackground(highlightColor);
 							}
 						}
 					}
@@ -221,6 +226,26 @@ public class GotoMenuActions {
 				messageBox.open();
 			}
 		}
-	}	
-	
+	}
+
+	private static int getStartIndex(int startIndex, List<Integer> foundIndexes) {
+		// if found, then select and finish
+		boolean foundValidIndex = false;
+
+		for (int i = 0; i < foundIndexes.size() && !foundValidIndex; i++) {
+			// actual index value
+			int indexValue = foundIndexes.get(i);
+
+			// check to see if index value is equal to our current selection index
+			if (startIndex == indexValue) {
+				foundValidIndex = true;
+			}
+		}
+
+		if (!foundValidIndex && foundIndexes.size() > 0) {
+			startIndex = foundIndexes.get(0);
+		}
+		return startIndex;
+	}
+
 }
