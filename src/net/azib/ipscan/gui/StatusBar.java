@@ -40,6 +40,8 @@ public class StatusBar {
 	private boolean maxThreadsReachedBefore;
 	private ProgressBar progressBar;
 	
+	private Text searchField;
+	
 	private ScannerConfig scannerConfig;
 	private GUIConfig guiConfig;
 	private StateMachine stateMachine;
@@ -58,7 +60,7 @@ public class StatusBar {
 		composite.setLayout(LayoutHelper.formLayout(1, 1, 2));
 		
 		statusText = new Label(composite, SWT.BORDER);
-		statusText.setLayoutData(formData(new FormAttachment(0), new FormAttachment(35), new FormAttachment(0), new FormAttachment(100)));
+		statusText.setLayoutData(formData(new FormAttachment(0), new FormAttachment(25), new FormAttachment(0), new FormAttachment(100)));
 		setStatusText(null);
 		
 		displayMethodText = new Label(composite, SWT.BORDER);
@@ -75,8 +77,12 @@ public class StatusBar {
 		setRunningThreads(0); // set back to 0 at startup
 		
 		progressBar = new ProgressBar(composite, SWT.BORDER);
-		progressBar.setLayoutData(formData(new FormAttachment(threadsText), new FormAttachment(100, 0), new FormAttachment(0), new FormAttachment(100)));
+		progressBar.setLayoutData(formData(new FormAttachment(threadsText), new FormAttachment(75), new FormAttachment(0), new FormAttachment(100)));
 		progressBar.setSelection(0);
+		
+		searchField = new Text(composite, SWT.BORDER);
+		searchField.setLayoutData(formData(new FormAttachment(progressBar), new FormAttachment(100, 0), new FormAttachment(0), new FormAttachment(100)));
+		searchField.setText("");
 	}
 	
 	/**

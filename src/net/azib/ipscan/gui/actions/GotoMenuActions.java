@@ -16,8 +16,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.widgets.*;
-import sun.rmi.runtime.Log;
-
 import javax.inject.Inject;
 import java.util.List;
 
@@ -145,6 +143,7 @@ public class GotoMenuActions {
 		public void handleEvent(Event event) {
 			InputDialog dialog = new InputDialog(Labels.getLabel("title.find"), Labels.getLabel("text.find"));
 			String text = dialog.open(lastText, Labels.getLabel("button.find.next"));
+			//TODO: nbsafkjnsfksjfk
 			if (text == null) {
 				return;
 			}
