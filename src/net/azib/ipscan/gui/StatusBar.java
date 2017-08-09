@@ -18,6 +18,7 @@ import net.azib.ipscan.gui.util.LayoutHelper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 
 import javax.inject.Inject;
@@ -41,6 +42,8 @@ public class StatusBar {
 	private ProgressBar progressBar;
 	
 	private Text searchField;
+	private Button searchPrevious; 
+	private Button searchNext;
 	
 	private ScannerConfig scannerConfig;
 	private GUIConfig guiConfig;
@@ -81,8 +84,17 @@ public class StatusBar {
 		progressBar.setSelection(0);
 		
 		searchField = new Text(composite, SWT.BORDER);
-		searchField.setLayoutData(formData(new FormAttachment(progressBar), new FormAttachment(100, 0), new FormAttachment(0), new FormAttachment(100)));
-		searchField.setText("");
+		searchField.setLayoutData(formData(new FormAttachment(progressBar), new FormAttachment(94), new FormAttachment(0), new FormAttachment(100)));
+		searchField.setText("Search here...");
+		
+		searchPrevious = new Button(composite, SWT.BORDER);
+		searchPrevious.setLayoutData(formData(new FormAttachment(searchField), new FormAttachment(97), new FormAttachment(0), new FormAttachment(100)));
+		searchPrevious.setText("<");
+		
+		searchNext = new Button(composite, SWT.BORDER);
+		searchNext.setLayoutData(formData(new FormAttachment(searchPrevious), new FormAttachment(100), new FormAttachment(0), new FormAttachment(100)));
+		searchNext.setText(">");
+		
 	}
 	
 	/**
