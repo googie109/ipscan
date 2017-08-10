@@ -130,15 +130,38 @@ public class GotoMenuActions {
 	}
 	
 	public static final class Find implements Listener {
+		// Search direction constants
+		public static final int NEXT = 1;
+		public static final int PREV = -1;
+		
+		// current direction that we are going (next or previous)
+		private static int searchDirection;
 
 		private final ResultTable resultTable;
 		private final StatusBar statusBar;
 		private String lastText = "";
+		private static Find instance;
+		
 
 		@Inject
 		public Find(StatusBar statusBar, ResultTable resultTable) {
 			this.statusBar = statusBar;
 			this.resultTable = resultTable;
+			if(instance == null){
+				instance = this;
+				searchDirection = NEXT;
+			}
+		}
+		
+		public static Find getInstance(){
+			return instance;
+		}
+		
+		public static void setSearchDirection(int value) {
+			if (!(value == NEXT || value == PREV)) {
+				throw new IllegalArgumentException("Invalid search direction: [" + value + "]");
+			}
+			searchDirection = value;
 		}
 		
 		public void handleEvent(Event event) {
@@ -169,16 +192,22 @@ public class GotoMenuActions {
 				}
 			});
 		}
-
+		
 		private void findText(String text, Shell activeShell) {
 			ScanningResultList results = resultTable.getScanningResults();
 
 			// clear out previous result highlights
 			clearHighlights(resultTable);
 			
-			int startIndex = resultTable.getSelectionIndex() + 1;
+			int startIndex = resultTable.getSelectionIndex() + searchDirection;
+			
+			//foundIndexes.ge
 			final List<Integer> foundIndexes = results.findText(text, 0);
-
+			
+			if (startIndex < 0 && searchDirection == PREV) {
+				startIndex = foundIndexes.get(foundIndexes.size() - 1);
+			}
+			
 			if (foundIndexes.size() > 0) {
 				// ensure start index is correct
 				startIndex = getStartIndex(startIndex, foundIndexes);

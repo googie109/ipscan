@@ -7,7 +7,11 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+
+import net.azib.ipscan.gui.actions.GotoMenuActions;
 
 public class SearchBar {
 	
@@ -26,12 +30,30 @@ public class SearchBar {
 		searchField.setToolTipText("Search here...");
 		
 		searchPrevious = new Button(composite, SWT.BORDER);
-		searchPrevious.setLayoutData(formData(new FormAttachment(searchField), new FormAttachment(97), new FormAttachment(0), new FormAttachment(100)));
+		searchPrevious.setLayoutData(formData(new FormAttachment(searchField), new FormAttachment(97), new FormAttachment(0), new FormAttachment(120)));
 		searchPrevious.setText("<");
+		searchPrevious.addListener(SWT.Selection, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				GotoMenuActions.Find.setSearchDirection(GotoMenuActions.Find.PREV);
+				GotoMenuActions.Find.getInstance().handleEvent(event);
+			}
+			
+		});;
 		
 		searchNext = new Button(composite, SWT.BORDER);
-		searchNext.setLayoutData(formData(new FormAttachment(searchPrevious), new FormAttachment(100), new FormAttachment(0), new FormAttachment(100)));
+		searchNext.setLayoutData(formData(new FormAttachment(searchPrevious), new FormAttachment(100), new FormAttachment(0), new FormAttachment(120)));
 		searchNext.setText(">");
+		searchNext.addListener(SWT.Selection, new Listener(){
+
+			@Override
+			public void handleEvent(Event event) {
+				GotoMenuActions.Find.setSearchDirection(GotoMenuActions.Find.NEXT);
+				GotoMenuActions.Find.getInstance().handleEvent(event);
+			}
+			
+		});;
 	}
 	
 	public static SearchBar create(Composite composite, Control parent){
