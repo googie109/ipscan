@@ -204,7 +204,8 @@ public class GotoMenuActions {
 			//foundIndexes.ge
 			final List<Integer> foundIndexes = results.findText(text, 0);
 			
-			if (startIndex < 0 && searchDirection == PREV) {
+			// check wrap around going backwards
+			if (startIndex - foundIndexes.get(0) < 0 && searchDirection == PREV) {
 				startIndex = foundIndexes.get(foundIndexes.size() - 1);
 			}
 			

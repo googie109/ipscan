@@ -36,8 +36,7 @@ public class SearchBar {
 
 			@Override
 			public void handleEvent(Event event) {
-				GotoMenuActions.Find.setSearchDirection(GotoMenuActions.Find.PREV);
-				GotoMenuActions.Find.getInstance().handleEvent(event);
+				find(event, GotoMenuActions.Find.PREV);
 			}
 			
 		});;
@@ -49,11 +48,15 @@ public class SearchBar {
 
 			@Override
 			public void handleEvent(Event event) {
-				GotoMenuActions.Find.setSearchDirection(GotoMenuActions.Find.NEXT);
-				GotoMenuActions.Find.getInstance().handleEvent(event);
+				find(event, GotoMenuActions.Find.NEXT);
 			}
 			
 		});;
+	}
+	
+	private void find(Event event, int direction) {
+		GotoMenuActions.Find.setSearchDirection(direction);
+		GotoMenuActions.Find.getInstance().handleEvent(event);
 	}
 	
 	public static SearchBar create(Composite composite, Control parent){
