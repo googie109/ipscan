@@ -170,7 +170,6 @@ public class GotoMenuActions {
 			if (text == null) {
 				return;
 			}
-			lastText = text;
 			
 			try {
 				statusBar.setStatusText(Labels.getLabel("state.searching"));
@@ -196,18 +195,15 @@ public class GotoMenuActions {
 		private void findText(String text, Shell activeShell) {
 			ScanningResultList results = resultTable.getScanningResults();
 
-			// clear out previous result highlights
-			clearHighlights(resultTable);
+			// clear out previous result highlights if text changed
+			if (!text.equals(lastText)) {
+				clearHighlights(resultTable);	
+			}
+			lastText = text;
 			
 			int startIndex = resultTable.getSelectionIndex() + searchDirection;
 			
-			//foundIndexes.ge
 			final List<Integer> foundIndexes = results.findText(text, 0);
-			
-			// check wrap around going backwards
-			if (startIndex - foundIndexes.get(0) < 0 && searchDirection == PREV) {
-				startIndex = foundIndexes.get(foundIndexes.size() - 1);
-			}
 			
 			if (foundIndexes.size() > 0) {
 				// ensure start index is correct
@@ -216,65 +212,80 @@ public class GotoMenuActions {
 				resultTable.setSelection(startIndex);
 				resultTable.setFocus();
 				resultTable.showSelection();
-
-				Display.getDefault().asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						Device device = Display.getCurrent();
-						// green color
-						Color highlightColor = new Color(device, 50, 255, 50);
-						for (Integer i : foundIndexes) {
-							TableItem item = resultTable.getItem(i);
-							if (!item.getText().equals("")) {
-								item.setBackground(highlightColor);
-							}
-						}
-					}
-				});
+				highlightMatches(foundIndexes);
 				return;
 			}
 
 			if (startIndex > 0 && foundIndexes.size() > 0) {
-				// if started not from the beginning, offer to restart				
-				MessageBox messageBox = new MessageBox(activeShell, SWT.YES | SWT.NO | SWT.ICON_QUESTION);
-				messageBox.setText(Labels.getLabel("title.find"));
-				messageBox.setMessage(Labels.getLabel("text.find.notFound") + " " + Labels.getLabel("text.find.restart"));
-				if (messageBox.open() == SWT.YES) {
-					resultTable.deselectAll();
-					findText(text, activeShell);
-				}
-				// reset back to the first table row if we didn't find anything
-				resultTable.setSelection(0);
-				resultTable.setFocus();
+				showRestartDialog(activeShell, text);
 			}
 			else {
 				// searching is finished, nothing was found				
-				MessageBox messageBox = new MessageBox(activeShell, SWT.OK | SWT.ICON_INFORMATION);
-				messageBox.setText(Labels.getLabel("title.find"));
-				messageBox.setMessage(Labels.getLabel("text.find.notFound"));
-				messageBox.open();
-			}
-		}
-	}
-
-	private static int getStartIndex(int startIndex, List<Integer> foundIndexes) {
-		// if found, then select and finish
-		boolean foundValidIndex = false;
-
-		for (int i = 0; i < foundIndexes.size() && !foundValidIndex; i++) {
-			// actual index value
-			int indexValue = foundIndexes.get(i);
-
-			// check to see if index value is equal to our current selection index
-			if (startIndex == indexValue) {
-				foundValidIndex = true;
+				showNotFoundDialog(activeShell);
 			}
 		}
 
-		if (!foundValidIndex && foundIndexes.size() > 0) {
-			startIndex = foundIndexes.get(0);
+		private void showNotFoundDialog(Shell activeShell) {
+			MessageBox messageBox = new MessageBox(activeShell, SWT.OK | SWT.ICON_INFORMATION);
+			messageBox.setText(Labels.getLabel("title.find"));
+			messageBox.setMessage(Labels.getLabel("text.find.notFound"));
+			messageBox.open();
 		}
-		return startIndex;
-	}
 
+		private void showRestartDialog(Shell activeShell, String text) {
+			// if started not from the beginning, offer to restart				
+			MessageBox messageBox = new MessageBox(activeShell, SWT.YES | SWT.NO | SWT.ICON_QUESTION);
+			messageBox.setText(Labels.getLabel("title.find"));
+			messageBox.setMessage(Labels.getLabel("text.find.notFound") + " " + Labels.getLabel("text.find.restart"));
+			if (messageBox.open() == SWT.YES) {
+				resultTable.deselectAll();
+				findText(text, activeShell);
+			}
+			// reset back to the first table row if we didn't find anything
+			resultTable.setSelection(0);
+			resultTable.setFocus();
+		}
+
+		private void highlightMatches(final List<Integer> foundIndexes) {
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					Device device = Display.getCurrent();
+					// green color
+					Color highlightColor = new Color(device, 50, 255, 50);
+					for (Integer i : foundIndexes) {
+						TableItem item = resultTable.getItem(i);
+						if (!item.getText().equals("")) {
+							item.setBackground(highlightColor);
+						}
+					}
+				}
+			});
+		}
+		
+		private static int getStartIndex(int startIndex, List<Integer> foundIndexes) {
+			// if found, then select and finish
+			boolean foundValidIndex = false;
+			
+			// check wrap around going backwards
+			if (startIndex - foundIndexes.get(0) < 0 && searchDirection == PREV) {
+				startIndex = foundIndexes.get(foundIndexes.size() - 1);
+			}
+
+			for (int i = 0; i < foundIndexes.size() && !foundValidIndex; i++) {
+				// actual index value
+				int indexValue = foundIndexes.get(i);
+
+				// check to see if index value is equal to our current selection index
+				if (startIndex == indexValue) {
+					foundValidIndex = true;
+				}
+			}
+
+			if (!foundValidIndex && foundIndexes.size() > 0) {
+				startIndex = foundIndexes.get(0);
+			}
+			return startIndex;
+		}
+	}
 }
